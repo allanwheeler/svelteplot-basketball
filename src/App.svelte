@@ -1,47 +1,169 @@
 <script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import { fade } from 'svelte/transition';
+  import { Plot, Dot, HTMLTooltip, BarX, groupY, Text } from 'svelteplot';
+  import Court from './components/Court.svelte';
+  import data from './data/shot-data.csv.js';
+
+  let selectedPlayer = $state(null);
+
+  // Filter: remove backcourt, then filter by player if selected
+  let filteredData = $derived(
+    data
+      .filter(d => d.zoneBasic !== 'Backcourt')
+      .filter(d => !selectedPlayer || d.namePlayer === selectedPlayer)
+  );
+
+  const players = [
+    { name: 'Stephen Curry', id: '3975' },
+    { name: 'LeBron James', id: '1966' },
+  ];
+
+  const toggle = n => (selectedPlayer = selectedPlayer === n ? null : n);
 </script>
 
-<main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
+<div class="top">
+  <Plot
+    axes={false}
+    aspectRatio={50 / 47}
+    x={{ domain: [-250, 250] }}
+    y={{ domain: [-50, 420] }}
+    color={{ legend: false }}
+  >
+    {#snippet header()}
+      <div class="player-image">
+        {#each players as { name, id }}
+          <button
+            onclick={() => toggle(name)}
+            class:active={selectedPlayer === name}
+          >
+            <img
+              src="https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/{id}.png"
+              alt={name}
+            />
+            <span class="player-label">{name}</span>
+          </button>
+        {/each}
 
-  <div class="card">
-    <Counter />
-  </div>
+        <div class="chart-container">
+          <Plot
+            class="small-plot"
+            x={{ label: '', axis: false }}
+            y={{ label: '' }}
+          >
+            <BarX
+              {...groupY(
+                { data: filteredData, y: 'typeShot', fill: 'typeShot' },
+                { x: 'count' }
+              )}
+            />
+            <Text
+              dx={-20}
+              {...groupY(
+                { data: filteredData, y: 'typeShot', fill: 'typeShot' },
+                { x: 'count' }
+              )}
+              text={d => d.__x.toLocaleString()}
+              fill="#ffffff"
+            />
+          </Plot>
+        </div>
+      </div>
+    {/snippet}
 
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
+    <Court />
 
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
-</main>
+    {#key selectedPlayer}
+      <g out:fade={{ duration: 200 }}>
+        <Dot
+          canvas={false}
+          data={filteredData}
+          x="locationX"
+          y="locationY"
+          fill="typeShot"
+          stroke={d => (d.typeShot === '2PT Field Goal' ? '#fff' : '#333')}
+          strokeWidth={0.5}
+          opacity={0.75}
+          r={4}
+        />
+      </g>
+    {/key}
+
+    {#snippet overlay()}
+      <HTMLTooltip data={filteredData} x="locationX" y="locationY">
+        {#snippet children({ datum })}
+          <div class="tooltip">
+            <div><strong>{datum.namePlayer}</strong></div>
+            <div>Zone: {datum.zoneBasic}</div>
+            <div>x: {datum.locationX} y: {datum.locationY}</div>
+          </div>
+        {/snippet}
+      </HTMLTooltip>
+    {/snippet}
+  </Plot>
+</div>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  .top {
+    min-width: 500px;
+    max-width: 800px;
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
+
+  .player-image {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    align-items: flex-start;
   }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
+
+  .player-image button {
+    background: none;
+    border: 3px solid transparent;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
   }
-  .read-the-docs {
-    color: #888;
+
+  .player-image img {
+    display: block;
+    object-fit: cover;
+    height: 70px;
+    width: 70px;
+    clip-path: circle(50%);
+    background: #eee;
+  }
+
+  .player-image:has(.active) button:not(.active) {
+    filter: grayscale(100%);
+    opacity: 0.4;
+  }
+
+  .player-label {
+    font-size: 11px;
+    color: #444;
+    white-space: nowrap;
+  }
+
+  .chart-container {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chart-container :global(.svelteplot) {
+    /* width: 100% !important; */
+    /* height: 100% !important; */
+  }
+
+  .tooltip {
+    background: white;
+    border: 1px solid #ccc;
+    font-size: 12px;
+    padding: 1ex 1em;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 </style>
