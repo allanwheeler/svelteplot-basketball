@@ -23,6 +23,7 @@
 
 <div class="top">
   <Plot
+    subtitle="Click on image to filter by player "
     axes={false}
     aspectRatio={50 / 47}
     x={{ domain: [-250, 250] }}
@@ -94,7 +95,7 @@
           <div class="tooltip">
             <div><strong>{datum.namePlayer}</strong></div>
             <div>Zone: {datum.zoneBasic}</div>
-            <div>x: {datum.locationX} y: {datum.locationY}</div>
+            <!-- <div>x: {datum.locationX} y: {datum.locationY}</div> -->
           </div>
         {/snippet}
       </HTMLTooltip>
@@ -107,7 +108,9 @@
     min-width: 500px;
     max-width: 800px;
   }
-
+  :global(h3) {
+    font-weight: 400;
+  }
   .player-image {
     display: flex;
     gap: 15px;
