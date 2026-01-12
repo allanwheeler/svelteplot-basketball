@@ -153,11 +153,6 @@
     min-width: 0;
   }
 
-  .chart-container :global(.svelteplot) {
-    /* width: 100% !important; */
-    /* height: 100% !important; */
-  }
-
   .tooltip {
     background: white;
     border: 1px solid #ccc;
