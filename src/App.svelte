@@ -23,7 +23,7 @@
 
 <div class="top">
   <Plot
-    subtitle="Click on image to filter by player "
+    subtitle="Click image to filter by player "
     axes={false}
     aspectRatio={50 / 47}
     x={{ domain: [-250, 250] }}
@@ -76,14 +76,12 @@
     {#key selectedPlayer}
       <g out:fade={{ duration: 200 }}>
         <Dot
-          canvas={false}
+          canvas={true}
           data={filteredData}
           x="locationX"
           y="locationY"
           fill="typeShot"
-          stroke={d => (d.typeShot === '2PT Field Goal' ? '#fff' : '#333')}
-          strokeWidth={0.5}
-          opacity={0.75}
+          opacity={0.5}
           r={4}
         />
       </g>
