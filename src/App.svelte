@@ -1,16 +1,33 @@
 <script>
   import { fade } from 'svelte/transition';
-  import { Plot, Dot, HTMLTooltip, BarX, groupY, Text } from 'svelteplot';
+  import {
+    Plot,
+    Dot,
+    HTMLTooltip,
+    BarX,
+    groupY,
+    Text,
+    setPlotDefaults,
+  } from 'svelteplot';
   import Court from './components/Court.svelte';
   import data from './data/shot-data.csv.js';
 
+  setPlotDefaults({
+    categoricalColorScheme: 'set2',
+    axis: {
+      tickSize: 0,
+      tickPadding: 5,
+    },
+  });
+
   let selectedPlayer = $state(null);
+  const rowHeight = 90;
 
   // Filter: remove backcourt, then filter by player if selected
   let filteredData = $derived(
     data
       .filter(d => d.zoneBasic !== 'Backcourt')
-      .filter(d => !selectedPlayer || d.namePlayer === selectedPlayer)
+      .filter(d => !selectedPlayer || d.namePlayer === selectedPlayer),
   );
 
   const players = [
@@ -31,7 +48,7 @@
     color={{ legend: false }}
   >
     {#snippet header()}
-      <div class="player-image">
+      <div class="player-image" style="--row-height: {rowHeight}px;">
         {#each players as { name, id }}
           <button
             onclick={() => toggle(name)}
@@ -48,20 +65,21 @@
         <div class="chart-container">
           <Plot
             class="small-plot"
+            height={rowHeight}
             x={{ label: '', axis: false }}
             y={{ label: '' }}
           >
             <BarX
               {...groupY(
                 { data: filteredData, y: 'typeShot', fill: 'typeShot' },
-                { x: 'count' }
+                { x: 'count' },
               )}
             />
             <Text
               dx={-20}
               {...groupY(
                 { data: filteredData, y: 'typeShot', fill: 'typeShot' },
-                { x: 'count' }
+                { x: 'count' },
               )}
               text={d => d.__x.toLocaleString()}
               fill="#ffffff"
@@ -102,6 +120,13 @@
 </div>
 
 <style>
+  .chart-container {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-self: stretch;
+  }
+
   .top {
     min-width: 500px;
     max-width: 800px;
@@ -113,7 +138,8 @@
     display: flex;
     gap: 15px;
     margin-bottom: 10px;
-    align-items: flex-start;
+    align-items: stretch;
+    height: var(--row-height);
   }
 
   .player-image button {
@@ -147,11 +173,6 @@
     font-size: 11px;
     color: #444;
     white-space: nowrap;
-  }
-
-  .chart-container {
-    flex: 1;
-    min-width: 0;
   }
 
   .tooltip {
