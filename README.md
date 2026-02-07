@@ -2,6 +2,9 @@
 
 A SveltePlot project that visualizes shot data for Stephen Curry and LeBron James. It's inspired by the R community and Observable-based projects (Example: [NBA Shot Charts](https://tanyaviz.com/projects/nba-shot-chart/)).
 
+![svelteplot-basketball](https://github.com/user-attachments/assets/f9065b89-8e86-49d6-800d-ac0df1ce0c64)
+
+
 The court is drawn programmatically using SveltePlot's `<CustomMark>` and the `usePlot()` hook. The component reads the plot scales (e.g., `plot.scales.x.fn` / `plot.scales.y.fn`) to convert court coordinates to SVG positions, then draws lines, arcs, rects, and circles (baseline, sidelines, three-point arc, paint, rim, free-throw circle, etc.).
 
 Example pattern:
