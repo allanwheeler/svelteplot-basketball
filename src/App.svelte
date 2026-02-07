@@ -160,7 +160,7 @@
     object-fit: cover;
     height: 70px;
     width: 70px;
-    clip-path: circle(50%);
+    clip-path: circle(45%);
     background: #eee;
   }
 
